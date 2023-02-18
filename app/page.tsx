@@ -58,7 +58,6 @@ export default function Home() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          console.log('form submitted');
           createTodo();
         }}
       >

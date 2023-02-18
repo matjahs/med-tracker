@@ -1,4 +1,4 @@
-import redis, { databaseName } from '@/lib/redis';
+import { deleteTodo, updateTodo } from '@/lib/cosmos';
 import type { NextApiHandler } from 'next';
 
 export const handler: NextApiHandler = async (req, res) => {
@@ -12,18 +12,22 @@ export const handler: NextApiHandler = async (req, res) => {
 
   switch (method) {
     case 'PUT':
-      const result = await redis.hset(databaseName, { [id]: { text, status } });
-
-      console.log(`[PUT] /api/todo/${id}`, { text, status });
-
-      return res.status(200).json({ message: 'Updated' });
+      try {
+        await updateTodo({ id, text, status });
+        
+        return res.status(200).json({ message: 'Updated' });
+      } catch {
+        return res.status(500).json({ message: `failed to update todo with id: ${id}` });
+      }
 
     case 'DELETE':
-      await redis.hdel(databaseName, id);
+      try {
+        await deleteTodo(id);
 
-      console.log(`[DELETE] /api/todo/${id}`);
-
-      return res.status(200).json({ message: 'Deleted' });
+        return res.status(200).json({ message: 'Deleted' });
+      } catch {
+        return res.status(500).json({ message: `failed to delete todo with id: ${id}` });
+      }
 
     default:
       return res.status(405).json({ message: 'Method not allowed' });

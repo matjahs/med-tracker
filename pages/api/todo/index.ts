@@ -1,33 +1,31 @@
-import redis, { databaseName } from '@/lib/redis';
 import type { NextApiHandler } from 'next';
-import type { TodoItem } from '@/global';
+import { createTodo, getTodos } from '@/lib/cosmos';
 
 const handler: NextApiHandler = async (req, res) => {
   const method = req.method;
-  console.log(req.body);
-  const { text } = req.body;
+  const { text, status } = req.body;
 
   switch (method) {
     case 'GET':
-      const data = await redis.hgetall(databaseName);
-      if (!data) {
-        return res.status(200).json([]);
+      try {
+        const data = await getTodos();
+        
+        return res.status(200).json(data);
+      } catch (error) {
+        return res.status(500).json({ message: `failed to get todo's`, error: error });
       }
-      const todos = Object.keys(data)
-        .map((key) => ({ ...data[key] as TodoItem, id: key }))
-        .sort((a, b) => Number(a.id) - Number(b.id));
 
-      console.log(`[GET] /api/todo`, JSON.stringify(todos, null, 2));
-
-      return res.status(200).json(todos);
     case 'POST':
+      try {
       const newId = Date.now().toString();
-      const todo = JSON.stringify({ text, status: false });
-      await redis.hset(databaseName, { [newId]: todo });
-
-      console.log(`[POST] /api/todo`, JSON.stringify(todo, null, 2));
-
-      return res.status(200).json({ message: 'Created' });
+      
+      const todo = await createTodo({ id: newId, text, status: false });
+      
+      return res.status(201).json(todo);
+    } catch {
+      return res.status(500).json({ message: `failed to create todo: ${JSON.stringify({text, status}, null, 2)}` });
+    }
+      
 
     default:
       return res.status(405).json({ message: 'Method not allowed' });
