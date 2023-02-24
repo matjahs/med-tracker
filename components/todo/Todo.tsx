@@ -1,9 +1,20 @@
 import * as React from 'react';
-import styled from '@emotion/styled';
 import type { TodoItem } from '@/types';
 import { formatDate, formatTime } from '@/lib/utils';
-import { TodoContent } from './Content';
-import { DeleteButton } from './DeleteButton';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
+import { styled } from '@mui/material/styles';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import { Chip, IconButton, Typography } from '@mui/material';
+
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+  ...theme.typography.body2,
+  padding: theme.spacing(1),
+  textAlign: 'center',
+  color: theme.palette.text.secondary
+}));
 
 export interface TodoProps {
   todo: TodoItem;
@@ -26,21 +37,26 @@ const Todo = ({ todo, deleteTodo }: TodoProps) => {
     setDateStr(formatDate(todo.time));
   }, [todo.time]);
 
-  React.useEffect(() => {
-    setUsers([...todo.users] || []);
-  }, [todo.users]);
-
   return (
-    <div className='todo'>
-
-      <TodoContent
-        timeStr={timeStr}
-        dateStr={dateStr}
-        users={users}
-        todo={todo}
-      />
-      <DeleteButton handleOnClick={() => deleteTodo(todo.id)} />
-    </div>
+    <Paper>
+      <Stack direction='row' spacing={2} justifyContent='space-between'>
+        <Stack direction='column'>
+          {todo.user1 && <Chip size='small' label='User 1' />}
+          {todo.user2 && <Chip size='small' label='User 2' />}
+          <Typography>
+            {todo.text}
+          </Typography>
+        </Stack>
+        <Stack direction='column'>
+          <IconButton aria-label='edit' color='primary'>
+            <EditIcon />
+          </IconButton>
+          <IconButton aria-label='delete' disabled color='primary'>
+            <DeleteIcon />
+          </IconButton>
+        </Stack>
+      </Stack>
+    </Paper>
   );
 };
 
@@ -65,55 +81,4 @@ const StyledTodo = styled(Todo)`
   }
 `;
 
-const Line = styled.div`
-  border-left: 1px solid black;
-  width: 1px;
-  flex: 0;
-  position: relative;
-  margin-right: 30px;
-`;
-
-const Dot = styled.div`
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: red;
-  margin-right: 10px;
-`;
-
-const LineWithDot = () => {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', marginRight: '30px', justifyContent: 'center', alignItems: 'center' }}>
-      <Dot />
-      <Line />
-    </div>
-  );
-};
-
-const TodoWrapper = (props: TodoProps) => {
-  return (
-    <div style={{ display: 'flex', justifyItems: 'space-between' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', marginRight: '30px', justifyContent: 'center', alignItems: 'center' }}>
-        <span style={{ display: 'table-cell', verticalAlign: 'middle' }}>{formatTime(props.todo.time)}</span>
-        <span style={{
-          display: 'table-cell',
-          verticalAlign: 'middle',
-          fontStyle: 'normal',
-          fontSize: '12px',
-          color: 'var(--gray-500)'
-        }}>{formatDate(props.todo.time)}</span>
-      </div>
-      <LineWithDot />
-      <StyledTodo {...props} />
-    </div>
-  );
-};
-
-const StyledTodoWrapper = styled(TodoWrapper)`
-  .line {
-    width: 10px;
-    background-color: red;
-  }
-`;
-
-export default StyledTodoWrapper;
+export default StyledTodo;

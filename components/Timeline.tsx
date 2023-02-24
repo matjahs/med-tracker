@@ -6,50 +6,29 @@ import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
+import { TodoItem } from '../types';
 
-export default function OppositeContentTimeline() {
+interface OppositeContentTimelineProps {
+  items: TodoItem[];
+}
+
+export default function OppositeContentTimeline({ items }: OppositeContentTimelineProps) {
   return (
     <Timeline position='alternate'>
-      <TimelineItem>
-        <TimelineOppositeContent color='text.secondary'>
-          09:30 am
-        </TimelineOppositeContent>
-        <TimelineSeparator>
-          <TimelineDot />
-          <TimelineConnector />
-        </TimelineSeparator>
-        <TimelineContent>Eat</TimelineContent>
-      </TimelineItem>
-      <TimelineItem>
-        <TimelineOppositeContent color='text.secondary'>
-          10:00 am
-        </TimelineOppositeContent>
-        <TimelineSeparator>
-          <TimelineDot />
-          <TimelineConnector />
-        </TimelineSeparator>
-        <TimelineContent>Code</TimelineContent>
-      </TimelineItem>
-      <TimelineItem>
-        <TimelineOppositeContent color='text.secondary'>
-          12:00 am
-        </TimelineOppositeContent>
-        <TimelineSeparator>
-          <TimelineDot />
-          <TimelineConnector />
-        </TimelineSeparator>
-        <TimelineContent>Sleep</TimelineContent>
-      </TimelineItem>
-      <TimelineItem>
-        <TimelineOppositeContent color='text.secondary'>
-          9:00 am
-        </TimelineOppositeContent>
-        <TimelineSeparator>
-          <TimelineDot />
-          <TimelineConnector />
-        </TimelineSeparator>
-        <TimelineContent>Repeat</TimelineContent>
-      </TimelineItem>
+      {items?.length !== 0 ? items.map((item) => (
+        <TimelineItem key={item.id}>
+          <TimelineOppositeContent color='text.secondary'>
+            {item.time.toLocaleTimeString()}
+          </TimelineOppositeContent>
+          <TimelineSeparator>
+            <TimelineDot />
+            <TimelineConnector />
+          </TimelineSeparator>
+          <TimelineContent>
+            {item.text}
+          </TimelineContent>
+        </TimelineItem>
+      )) : null}
     </Timeline>
   );
 }

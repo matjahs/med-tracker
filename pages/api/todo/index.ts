@@ -1,9 +1,10 @@
 import type { NextApiHandler } from 'next';
 import { createTodo, getTodos } from '@/lib/cosmos';
+import {v4 as uuid} from 'uuid';
 
 const handler: NextApiHandler = async (req, res) => {
   const method = req.method;
-  const { text, users, time } = req.body;
+  const { text, users, time, substance, user1, user2 } = req.body;
 
   switch(method) {
     case 'GET':
@@ -26,11 +27,15 @@ const handler: NextApiHandler = async (req, res) => {
           return res.status(400).json({ message: `field required: time, got: ${time}` });
         }
 
+
+
         const todo = await createTodo({
-          id: Date.now().toString(),
+          id: uuid(),
           text,
           time,
-          users
+          user1,
+          user2,
+          substance
         });
 
         return res.status(201).json(todo);
