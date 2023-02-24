@@ -1,33 +1,47 @@
-import redis, { databaseName } from '@/lib/redis';
 import type { NextApiHandler } from 'next';
-import type { TodoItem } from '@/global';
+import { createTodo, getTodos } from '@/lib/cosmos';
+import {v4 as uuid} from 'uuid';
 
 const handler: NextApiHandler = async (req, res) => {
   const method = req.method;
-  console.log(req.body);
-  const { text } = req.body;
+  const { text, users, time, substance, user1, user2 } = req.body;
 
-  switch (method) {
+  switch(method) {
     case 'GET':
-      const data = await redis.hgetall(databaseName);
-      if (!data) {
-        return res.status(200).json([]);
+      try {
+        const data = await getTodos();
+
+        return res.status(200).json(data);
+      } catch(error) {
+        return res.status(500).json({ message: `failed to get todo's`, error: error });
       }
-      const todos = Object.keys(data)
-        .map((key) => ({ ...data[key] as TodoItem, id: key }))
-        .sort((a, b) => Number(a.id) - Number(b.id));
 
-      console.log(`[GET] /api/todo`, JSON.stringify(todos, null, 2));
-
-      return res.status(200).json(todos);
     case 'POST':
-      const newId = Date.now().toString();
-      const todo = JSON.stringify({ text, status: false });
-      await redis.hset(databaseName, { [newId]: todo });
+      try {
+        if(text === undefined || text === null) {
+          return res.status(400).json({ message: 'field required: text' });
+        }
 
-      console.log(`[POST] /api/todo`, JSON.stringify(todo, null, 2));
+        const parsedTime = new Date(time);
+        if(!parsedTime) {
+          return res.status(400).json({ message: `field required: time, got: ${time}` });
+        }
 
-      return res.status(200).json({ message: 'Created' });
+
+
+        const todo = await createTodo({
+          id: uuid(),
+          text,
+          time,
+          user1,
+          user2,
+          substance
+        });
+
+        return res.status(201).json(todo);
+      } catch {
+        return res.status(500).json({ message: `failed to create todo: ${JSON.stringify({ time, text, users }, null, 2)}` });
+      }
 
     default:
       return res.status(405).json({ message: 'Method not allowed' });
